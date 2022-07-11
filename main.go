@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	_ "embed"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,14 +13,31 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+const appName = "zippia"
+const version = "0.0.1"
+
 func main() {
+	addr := flag.String("a", "127.0.0.1:8000", "address to bind.")
+	path := flag.String("p", "/", "API endpoint path")
+	showVersion := flag.Bool("v", false, "show version.")
+	flag.Parse()
+	if *showVersion {
+		fmt.Printf("%s %s\n", appName, version)
+		return
+	}
+
 	db, err := initialize()
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc(*path, func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != *path {
+			http.NotFound(w, r)
+			return
+		}
+
 		zip := r.URL.Query().Get("zip")
 
 		stmt, err := db.Prepare("SELECT zip, pref, city, town, pref_kana, city_kana, town_kana FROM address WHERE zip = ?")
@@ -50,8 +68,8 @@ func main() {
 		fmt.Fprintf(w, string(body))
 	})
 
-	log.Println("http server started on localhost:8080")
-	http.ListenAndServe(":8080", nil)
+	log.Printf("http server started on http://%s%s\n", *addr, *path)
+	http.ListenAndServe(*addr, nil)
 }
 
 //go:embed kenall.json
