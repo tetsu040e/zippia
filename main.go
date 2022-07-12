@@ -59,6 +59,10 @@ func main() {
 			}
 			list = append(list, address)
 		}
+		if len(list) == 0 {
+			http.NotFound(w, r)
+			return
+		}
 
 		body, err := json.Marshal(list)
 		if err != nil {
