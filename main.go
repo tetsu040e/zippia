@@ -17,8 +17,8 @@ const appName = "zippia"
 const version = "0.0.1"
 
 func main() {
-	addr := flag.String("a", "127.0.0.1:8000", "address to bind.")
-	path := flag.String("p", "/", "API endpoint path")
+	host := flag.String("host", "127.0.0.1", "host part of bind address.")
+	port := flag.String("port", "5000", "port part of bind address.")
 	showVersion := flag.Bool("v", false, "show version.")
 	flag.Parse()
 	if *showVersion {
@@ -32,8 +32,8 @@ func main() {
 	}
 	defer db.Close()
 
-	http.HandleFunc(*path, func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != *path {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
 			http.NotFound(w, r)
 			return
 		}
@@ -72,8 +72,9 @@ func main() {
 		fmt.Fprintf(w, string(body))
 	})
 
-	log.Printf("http server started on http://%s%s\n", *addr, *path)
-	http.ListenAndServe(*addr, nil)
+	addr := fmt.Sprintf("%s:%s", *host, *port)
+	log.Printf("http server started on http://%s\n", addr)
+	log.Fatal(http.ListenAndServe(addr, nil))
 }
 
 //go:embed kenall.json
