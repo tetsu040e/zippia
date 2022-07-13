@@ -16,6 +16,12 @@ import (
 const appName = "zippia"
 const version = "0.0.1"
 
+//go:embed banner.txt
+var banner []byte
+
+//go:embed kenall.json
+var kenall []byte
+
 func main() {
 	host := flag.String("host", "127.0.0.1", "host part of bind address.")
 	port := flag.String("port", "5000", "port part of bind address.")
@@ -73,12 +79,10 @@ func main() {
 	})
 
 	addr := fmt.Sprintf("%s:%s", *host, *port)
+	log.Println("start the Japanese zip code search API server.\n" + string(banner))
 	log.Printf("http server started on http://%s\n", addr)
 	log.Fatal(http.ListenAndServe(addr, nil))
 }
-
-//go:embed kenall.json
-var kenall []byte
 
 type Address struct {
 	Id       int    `json:"-"`
@@ -92,7 +96,7 @@ type Address struct {
 }
 
 func initialize() (*sql.DB, error) {
-	log.Println("initializing DB...")
+	log.Println("initializing database...")
 	db, err := sql.Open("sqlite3", "file:zip.db?cache=shared&mode=memory")
 	if err != nil {
 		return nil, err
@@ -142,7 +146,7 @@ CREATE INDEX zipcode ON address (zip);
 	}
 
 	db.SetConnMaxLifetime(-1)
-	log.Println("DB initialization is completed!")
+	log.Println("database initialization is completed!")
 	return db, nil
 }
 
