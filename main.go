@@ -22,6 +22,9 @@ var banner []byte
 //go:embed kenall.json
 var kenall []byte
 
+//go:embed jigyosyo.json
+var jigyosyo []byte
+
 func main() {
 	host := flag.String("host", "127.0.0.1", "host part of bind address.")
 	port := flag.String("port", "5000", "port part of bind address.")
@@ -46,7 +49,7 @@ func main() {
 
 		zip := r.URL.Query().Get("zip")
 
-		stmt, err := db.Prepare("SELECT zip, pref, city, town, pref_kana, city_kana, town_kana FROM address WHERE zip = ?")
+		stmt, err := db.Prepare("SELECT zip, pref, city, town, pref_kana, city_kana, town_kana, office, office_kana FROM address WHERE zip = ?")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -58,12 +61,13 @@ func main() {
 		defer rows.Close()
 		list := []Address{}
 		for rows.Next() {
-			var address Address
-			err = rows.Scan(&address.Zip, &address.Pref, &address.City, &address.Town, &address.PrefKana, &address.CityKana, &address.TownKana)
+			var row Address
+			err = rows.Scan(&row.Zip, &row.Pref, &row.City, &row.Town, &row.PrefKana, &row.CityKana, &row.TownKana, &row.Office, &row.OfficeKana)
 			if err != nil {
+				log.Println(err)
 				break
 			}
-			list = append(list, address)
+			list = append(list, row)
 		}
 
 		body, err := json.Marshal(list)
@@ -81,14 +85,16 @@ func main() {
 }
 
 type Address struct {
-	Id       int    `json:"-"`
-	Zip      string `json:"zip"`
-	Pref     string `json:"pref"`
-	City     string `json:"city"`
-	Town     string `json:"town"`
-	PrefKana string `json:"pref_kana"`
-	CityKana string `json:"city_kana"`
-	TownKana string `json:"town_kana"`
+	Id         int    `json:"-"`
+	Zip        string `json:"zip"`
+	Pref       string `json:"pref"`
+	City       string `json:"city"`
+	Town       string `json:"town"`
+	PrefKana   string `json:"pref_kana"`
+	CityKana   string `json:"city_kana"`
+	TownKana   string `json:"town_kana"`
+	Office     string `json:"office"`
+	OfficeKana string `json:"office_kana"`
 }
 
 func initialize() (*sql.DB, error) {
@@ -102,14 +108,16 @@ func initialize() (*sql.DB, error) {
 DROP INDEX IF EXISTS zipcode;
 DROP TABLE IF EXISTS address;
 CREATE TABLE IF NOT EXISTS address (
-    id        INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    zip       TEXT,
-    pref      TEXT,
-    city      TEXT,
-    town      TEXT,
-    pref_kana TEXT,
-    city_kana TEXT,
-    town_kana TEXT
+    id          INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    zip         TEXT NOT NULL,
+    pref        TEXT,
+    city        TEXT,
+    town        TEXT,
+    pref_kana   TEXT,
+    city_kana   TEXT,
+    town_kana   TEXT,
+    office      TEXT,
+    office_kana TEXT
 );
 CREATE INDEX zipcode ON address (zip);
     `
@@ -118,26 +126,28 @@ CREATE INDEX zipcode ON address (zip);
 		return nil, err
 	}
 
-	var list []Address
-	if err := json.Unmarshal(kenall, &list); err != nil {
-		return nil, err
-	}
+	for _, bytes := range [][]byte{kenall, jigyosyo} {
+		var list []Address
+		if err := json.Unmarshal(bytes, &list); err != nil {
+			return nil, err
+		}
 
-	const bufSize = 100
-	buf := []Address{}
-	for _, address := range list {
-		buf = append(buf, address)
-		if len(buf) >= bufSize {
+		const bufSize = 100
+		buf := []Address{}
+		for _, address := range list {
+			buf = append(buf, address)
+			if len(buf) >= bufSize {
+				err = flush(db, &buf)
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+		if len(buf) > 0 {
 			err = flush(db, &buf)
 			if err != nil {
 				return nil, err
 			}
-		}
-	}
-	if len(buf) > 0 {
-		err = flush(db, &buf)
-		if err != nil {
-			return nil, err
 		}
 	}
 
@@ -167,12 +177,12 @@ func createBulkInsertQuery(list []Address) (string, []interface{}) {
 	placeholder := []string{}
 	args := []interface{}{}
 
-	for _, address := range list {
-		placeholder = append(placeholder, "(?,?,?,?,?,?,?)")
-		args = append(args, address.Zip, address.Pref, address.City, address.Town, address.PrefKana, address.CityKana, address.TownKana)
+	for _, row := range list {
+		placeholder = append(placeholder, "(?,?,?,?,?,?,?,?,?)")
+		args = append(args, row.Zip, row.Pref, row.City, row.Town, row.PrefKana, row.CityKana, row.TownKana, row.Office, row.OfficeKana)
 	}
 
-	query := fmt.Sprintf("INSERT INTO address (zip, pref, city, town, pref_kana, city_kana, town_kana) VALUES %s", strings.Join(placeholder, ","))
+	query := fmt.Sprintf("INSERT INTO address (zip, pref, city, town, pref_kana, city_kana, town_kana, office, office_kana) VALUES %s", strings.Join(placeholder, ","))
 
 	return query, args
 }
