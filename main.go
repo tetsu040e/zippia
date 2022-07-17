@@ -16,6 +16,9 @@ import (
 const appName = "zippia"
 const version = "v0.1.1"
 
+//go:embed var/last-modified.txt
+var lastModified []byte
+
 //go:embed var/banner.txt
 var banner []byte
 
@@ -29,9 +32,14 @@ func main() {
 	host := flag.String("host", "127.0.0.1", "host part of bind address.")
 	port := flag.String("port", "5000", "port part of bind address.")
 	showVersion := flag.Bool("v", false, "show version.")
+	showVersionFull := flag.Bool("vv", false, "show version and last modified date.")
 	flag.Parse()
 	if *showVersion {
 		fmt.Printf("%s %s\n", appName, version)
+		return
+	}
+	if *showVersionFull {
+		fmt.Printf("%s %s\n\nZip code was last modified on %s", appName, version, string(lastModified))
 		return
 	}
 
