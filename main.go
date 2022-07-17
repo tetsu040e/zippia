@@ -14,15 +14,15 @@ import (
 )
 
 const appName = "zippia"
-const version = "0.0.1"
+const version = "v0.1.1"
 
-//go:embed banner.txt
+//go:embed var/banner.txt
 var banner []byte
 
-//go:embed kenall.json
+//go:embed var/kenall.json
 var kenall []byte
 
-//go:embed jigyosyo.json
+//go:embed var/jigyosyo.json
 var jigyosyo []byte
 
 func main() {

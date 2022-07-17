@@ -7,7 +7,7 @@ if !(type ken-all > /dev/null); then
     go install github.com/inouet/ken-all@latest
 fi
 
-ken-all address KEN_ALL.CSV -t json | sed -e "s/$/,/g" | tr -d '\n' | sed -e "s/^/[/" | sed -e "s/,$/]/" > kenall.json
+ken-all address KEN_ALL.CSV -t json | sed -e "s/$/,/g" | tr -d '\n' | sed -e "s/^/[/" | sed -e "s/,$/]/" > var/kenall.json
 
 ken-all office JIGYOSYO.CSV -t json | sed -e "s/$/,/g" | tr -d '\n' | sed -e "s/^/[/" | sed -e "s/,$/]/" | jq -c 'map({
     zip: .zip7,
@@ -16,6 +16,6 @@ ken-all office JIGYOSYO.CSV -t json | sed -e "s/$/,/g" | tr -d '\n' | sed -e "s/
     town: .town,
     office: .name,
     office_kana: .kana
-})' > jigyosyo.json
+})' > var/jigyosyo.json
 
 exit 0
