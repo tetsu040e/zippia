@@ -1,0 +1,62 @@
+openapi: "3.0.0"
+info:
+  title: "zippia API"
+  description: "シンプルな郵便番号検索API"
+  license:
+    name: "MIT"
+    url: "https://github.com/tetsu040e/zippia/blob/main/LICENSE"
+  version: "v0.1.1"
+paths:
+  /:
+    get:
+      summary: "郵便番号検索"
+      description: "指定した郵便番号から該当する住所をレスポンスします"
+      parameters:
+        - name: "zip"
+          in: "query"
+          description: "郵便番号をハイフンなしの7桁で指定"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        '200':
+          description: "住所データの配列"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: '#/components/schemas/Address'
+                example:
+                  - zip: "1600022"
+                    pref: "東京都"
+                    city: "新宿区"
+                    town: "新宿"
+                    pref_kana: "トウキョウト"
+                    city_kana: "シンジュクク"
+                    town_kana: "シンジュク"
+                    office: ""
+                    office_kana: ""
+components:
+  schemas:
+    Address:
+      type: "object"
+      properties:
+        zip:
+          type: "string"
+        pref:
+          type: "string"
+        city:
+          type: "string"
+        town:
+          type: "string"
+        office:
+          type: "string"
+        office_kana:
+          type: "string"
+        pref_kana:
+          type: "string"
+        city_kana:
+          type: "string"
+        town_kana:
+          type: "string"
