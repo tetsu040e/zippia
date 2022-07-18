@@ -98,10 +98,10 @@ type Address struct {
 	Pref       string `json:"pref"`
 	City       string `json:"city"`
 	Town       string `json:"town"`
+	Office     string `json:"office"`
 	PrefKana   string `json:"pref_kana"`
 	CityKana   string `json:"city_kana"`
 	TownKana   string `json:"town_kana"`
-	Office     string `json:"office"`
 	OfficeKana string `json:"office_kana"`
 }
 
@@ -121,10 +121,10 @@ CREATE TABLE IF NOT EXISTS address (
     pref        TEXT,
     city        TEXT,
     town        TEXT,
+    office      TEXT,
     pref_kana   TEXT,
     city_kana   TEXT,
     town_kana   TEXT,
-    office      TEXT,
     office_kana TEXT
 );
 CREATE INDEX zipcode ON address (zip);
