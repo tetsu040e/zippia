@@ -5,19 +5,24 @@ zippia はシンプルな郵便番号検索 API サーバーです。
 
 ## Usage
 
-### シンプルな使い方
+### most simple usage
 ```
 $ zippia
 ```
-127.0.0.1:5000 をバインドして HTTP サーバーが立ち上がります
+オプションなしで起動すると、 127.0.0.1:5000 をバインドして HTTP サーバーが立ち上がります。
 
-### host, port を指定
+### specify binds host and port
 
 ```
 $ zippia --host 0.0.0.0 --port 8080
 ```
 
 詳細は `zippia -h` を確認してください。
+
+## API specification
+
+https://tetsu040e.github.io/zippia/ を参照してください
+
 
 ## Requirements
 
