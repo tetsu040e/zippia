@@ -1,6 +1,6 @@
 # zippia
 
-zippia はシンプルな郵便番号検索 API サーバーです。  
+zippia はシンプルな郵便番号検索 API サーバーです。
 データベースを内包しているため、バイナリひとつで動作します。
 
 ## Usage
@@ -26,7 +26,7 @@ https://tetsu040e.github.io/zippia/ を参照してください
 
 ## Requirements
 
-go >= 1.16
+go >= 1.18
 
 ## Installation
 
