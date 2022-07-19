@@ -1,0 +1,5 @@
+#!/bin/bash
+
+rm KEN_ALL.ZIP KEN_ALL.CSV JIGYOSYO.ZIP JIGYOSYO.CSV
+
+exit 0
