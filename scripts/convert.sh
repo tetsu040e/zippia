@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # KEN_ALL.CSV  -> kenall.json
 # JIGYOSYO.CSV -> jigyosyo.json
 # using ken-all (Copyright (c) 2018 Taiji Inoue. source: https://github.com/inouet/ken-all)
