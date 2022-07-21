@@ -75,9 +75,11 @@ jobs:
         run: |
           (
             cd build
-            for file in `ls`; do
+            for file in `ls`;do
               chmod +x $file
-              zip -r ${file}.zip $file
+              replaced=`echo $file | sed -E "s/^zippia([^.]+)(.exe)?$/zippia\2/"`
+              mv $file $replaced
+              zip -r ${file}.zip $replaced
             done;
           )
         if: steps.check.outputs.updated == 'true' && steps.diff.outcome == 'failure'
