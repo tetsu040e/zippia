@@ -67,7 +67,7 @@ jobs:
           v: true
           x: false
           race: false
-          ldflags: -s -w
+          ldflags: -s -w -static
           buildmode: default
           trimpath: true
         if: steps.check.outputs.updated == 'true' && steps.diff.outcome == 'failure'
