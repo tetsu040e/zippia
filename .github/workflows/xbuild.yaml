@@ -1,4 +1,4 @@
-name: check-and-update
+name: xbuild
 on:
   push:
     branches:
