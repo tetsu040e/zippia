@@ -1,58 +1,26 @@
 name: check-and-update
 on:
-  schedule:
-    - cron: "27 1,16 * * *"
+  push:
+    branches:
+      - main
 jobs:
-  check-and-update:
+  xbuild:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v3
-      - name: check for update
-        run: ./scripts/check_for_updates.sh
-        id: check
-      - name: download
-        run: ./scripts/download_and_unzip.sh
-        if: steps.check.outputs.updated == 'true'
-      - name: setup go
-        uses: actions/setup-go@v3
-        with:
-          go-version: ^1.18
-        id: go
-        if: steps.check.outputs.updated == 'true'
-      - name: convert
-        run: ./scripts/convert.sh
-        if: steps.check.outputs.updated == 'true'
-      - name: clean
-        run: ./scripts/clean.sh
-        if: steps.check.outputs.updated == 'true'
-      - name: create tag dry run
-        id: tag_version_dry
-        uses: mathieudutour/github-tag-action@v6.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          dry_run: true
-        if: steps.check.outputs.updated == 'true'
       - name: update version file
         run: |
           echo "${{ steps.tag_version_dry.outputs.new_tag }}" > var/version.txt
           cat var/version.txt
-        if: steps.check.outputs.updated == 'true'
-      - name: diff
-        id: diff
-        run: |
-          git diff --name-only --exit-code
-        continue-on-error: true
-        if: steps.check.outputs.updated == 'true'
       - name: commit & push
         run: |
           git status -sb
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
-          git commit -m "update zip code data"
+          git commit -m "update version.txt"
           git push
-        if: steps.check.outputs.updated == 'true' && steps.diff.outcome == 'failure'
       - name: cross build
         uses: crazy-max/ghaction-xgo@v2
         with:
@@ -67,7 +35,6 @@ jobs:
           ldflags: -s -w -extldflags "-static"
           buildmode: default
           trimpath: true
-        if: steps.check.outputs.updated == 'true' && steps.diff.outcome == 'failure'
       - name: chmod & compress
         run: |
           (
@@ -79,13 +46,11 @@ jobs:
               zip -r ${file}.zip $replaced
             done;
           )
-        if: steps.check.outputs.updated == 'true' && steps.diff.outcome == 'failure'
       - name: create tag and push tag
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-        if: steps.check.outputs.updated == 'true' && steps.diff.outcome == 'failure'
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
         with:
@@ -93,4 +58,3 @@ jobs:
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
-        if: steps.check.outputs.updated == 'true' && steps.diff.outcome == 'failure'
