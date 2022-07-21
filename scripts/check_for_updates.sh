@@ -6,8 +6,8 @@ last_modified=$(cat ${last_modified_path})
 
 status_code=`curl $url -I -H "If-Modified-Since: ${last_modified}" -w %{http_code} -o /dev/null -s`
 if [ "$status_code" -eq "200" ]; then
-    curl $url -I -s | grep "^Last-Modified" | cut -f2- -d' ' > $last_modified_path
-    printf "updated"
+    curl $url -I -s | grep "^Last-Modified" | cut -f2- -d' ' | tr -d "\r\n" > $last_modified_path
+    echo "::set-output name=updated::true"
 fi
 
 exit 0

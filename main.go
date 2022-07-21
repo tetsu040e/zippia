@@ -14,7 +14,9 @@ import (
 )
 
 const appName = "zippia"
-const version = "v0.2.1"
+
+//go:embed var/version.txt
+var version []byte
 
 //go:embed var/last-modified.txt
 var lastModified []byte
@@ -35,11 +37,16 @@ func main() {
 	showVersionFull := flag.Bool("vv", false, "show version and last modified date.")
 	flag.Parse()
 	if *showVersion {
-		fmt.Printf("%s %s\n", appName, version)
+		fmt.Printf("%s %s\n", appName, strings.TrimSuffix(string(version), "\n"))
 		return
 	}
 	if *showVersionFull {
-		fmt.Printf("%s %s\n\nZip code was last modified on %s", appName, version, string(lastModified))
+		fmt.Printf(
+			"%s %s\nZip code was last modified on \"%s\"\n",
+			appName,
+			strings.TrimSuffix(string(version), "\n"),
+			strings.TrimSuffix(string(lastModified), "\n"),
+		)
 		return
 	}
 
