@@ -9,6 +9,12 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
+      - name: create tag dry run
+        id: tag_version_dry
+        uses: mathieudutour/github-tag-action@v6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          dry_run: true
       - name: update version file
         run: |
           echo "${{ steps.tag_version_dry.outputs.new_tag }}" > var/version.txt
