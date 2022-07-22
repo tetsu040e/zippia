@@ -27,6 +27,8 @@ jobs:
           git add .
           git commit -m "update version.txt"
           git push
+      - name: checkout retry
+        uses: actions/checkout@v3
       - name: cross build
         uses: crazy-max/ghaction-xgo@v2
         with:
