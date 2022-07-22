@@ -33,14 +33,14 @@ go >= 1.18
 ```
 go install github.com/tetsu040e/zippia@latest
 ```
-もしくは [Releases](https://github.com/tetsu040e/zippia/releases) から最新バイナリをダウンロードしてください。
+もしくは [Releases](https://github.com/tetsu040e/zippia/releases/latest) から最新バイナリをダウンロードしてください。
 
 ## Update zip code data
 
 郵便番号のデータは概ね1ヶ月ごとに更新されます。  
 zippia は GitHub Actions を使って定期的に日本郵政のホームページをチェックし、データを更新しています。  
 `go install` でインストールした場合は `@latest` を使って再インストールすることで、最新データを内包したバイナリに更新できます。　　  
-また、[Releases](https://github.com/tetsu040e/zippia/releases) へ定期的に、最新データを内包したバイナリがアップロードされるようになっています。  
+また、[Releases](https://github.com/tetsu040e/zippia/releases/latest) へ定期的に、最新データを内包したバイナリがアップロードされるようになっています。  
 インストール済みのバイナリ内のデータ最終更新日時は `zippia -vv` を実行して確認できます。
 
 ## License
