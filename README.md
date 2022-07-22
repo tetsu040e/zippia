@@ -5,7 +5,7 @@ zippia はシンプルな郵便番号検索 API サーバーです。
 
 ## Usage
 
-### most simple usage
+### simplest usage
 ```
 $ zippia
 ```
