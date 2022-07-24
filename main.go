@@ -63,6 +63,7 @@ func main() {
 		}
 
 		zip := r.URL.Query().Get("zip")
+		zip = strings.Replace(zip, "-", "", 1)
 
 		stmt, err := db.Prepare("SELECT zip, pref, city, town, pref_kana, city_kana, town_kana, office, office_kana FROM address WHERE zip = ?")
 		if err != nil {
