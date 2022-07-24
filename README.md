@@ -30,10 +30,19 @@ go >= 1.18
 
 ## Installation
 
+### use Go
 ```
 go install github.com/tetsu040e/zippia@latest
 ```
-もしくは [Releases](https://github.com/tetsu040e/zippia/releases/latest) から最新バイナリをダウンロードしてください。
+
+### use Docker 
+```
+docker run -it -p 5000:5000 tetsu040e/zippia
+```
+
+### use binary file
+
+[Releases](https://github.com/tetsu040e/zippia/releases/latest) から最新バイナリをダウンロードしてください。
 
 ## Update zip code data
 
