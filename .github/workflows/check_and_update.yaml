@@ -38,8 +38,8 @@ jobs:
       - name: commit & push
         run: |
           git status -sb
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git add .
           git commit -m "update zip code data"
           git push
