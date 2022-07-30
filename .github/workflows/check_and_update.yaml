@@ -2,7 +2,7 @@ name: check-and-update
 on:
   schedule:
     - cron: "27 1,9,16 * * *"
-    - cron: "48 * * * *"
+    - cron: "53 * * * *"
 jobs:
   check-and-update:
     runs-on: ubuntu-latest
