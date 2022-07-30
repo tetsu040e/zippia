@@ -72,6 +72,9 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ needs.tagging.outputs.tag }}
+      - name: cat
+        run: |
+          cat var/last-modified.txt
       - name: cross build
         uses: crazy-max/ghaction-xgo@v2
         with:
