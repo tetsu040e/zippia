@@ -1,0 +1,112 @@
+name: learn-github-actions
+on:
+  push:
+    branches:
+      - main
+jobs:
+  tagging:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: create tag and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      tag: ${{ steps.tag_version.outputs.new_tag }}
+      changelog: ${{ steps.tag_version.outputs.changelog }}
+  cross-build:
+    runs-on: ubuntu-latest
+    needs: tagging
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.tagging.outputs.tag }}
+      - name: cross build
+        uses: crazy-max/ghaction-xgo@v2
+        with:
+          xgo_version: latest
+          go_version: 1.18
+          dest: build
+          prefix: zippia-${{ needs.tagging.outputs.tag }}
+          targets: windows/amd64,linux/amd64,linux/arm64
+          v: true
+          x: false
+          race: false
+          ldflags: -s -w -extldflags "-static" -X main.Version=${{ needs.tagging.outputs.tag }}
+          buildmode: default
+          trimpath: true
+        if: needs.tagging.outputs.tag
+      - name: chmod & compress
+        run: |
+          (
+            cd build
+            for file in `ls`; do
+              chmod +x $file
+              replaced=`echo $file | sed -E 's/${{ needs.tagging.outputs.tag }}//g' | sed -E "s/^zippia([^.]+)(.exe)?$/zippia\2/"`
+              mv $file $replaced
+              zip -r ${file}.zip $replaced
+            done;
+          )
+        if: needs.tagging.outputs.tag
+      - uses: actions/upload-artifact@v3
+        with:
+          name: artifacts-by-cross-build
+          path: build/*.zip
+  build-on-mac:
+    runs-on: macos-latest
+    needs: tagging
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.tagging.outputs.tag }}
+      - name: setup go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.18
+        id: go
+        if: needs.tagging.outputs.tag
+      - name: build
+        run: |
+          go build -ldflags '-s -w -X main.Version=${{ needs.tagging.outputs.tag }}' -trimpath -o build/zippia
+          (
+            cd build
+            zip -r zippia-${{ needs.tagging.outputs.tag }}-darwin-amd64.zip zippia
+          )
+        if: needs.tagging.outputs.tag
+      - uses: actions/upload-artifact@v3
+        with:
+          name: artifacts-by-mac
+          path: build/*.zip
+  create-releases:
+    runs-on: ubuntu-latest
+    needs:
+      - tagging
+      - cross-build
+      - build-on-mac
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: artifacts-by-cross-build
+          path: build/
+        if: needs.tagging.outputs.tag
+      - uses: actions/download-artifact@v3
+        with:
+          name: artifacts-by-mac
+          path: build/
+        if: needs.tagging.outputs.tag
+      - name: ls
+        run: ls -la build/
+      - name: Create a GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/*.zip"
+          tag: ${{ needs.tagging.outputs.tag }}
+          name: Release ${{ needs.tagging.outputs.tag }}
+          body: ${{ needs.tagging.outputs.changelog }}
+        if: needs.tagging.outputs.tag
+
