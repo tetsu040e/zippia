@@ -207,7 +207,7 @@ jobs:
         with:
           images: tetsu040e/zippia
           tags: |
-            type=semver,pattern={{raw}}
+            type=semver,pattern={{raw}},value=${{ needs.tagging.outputs.tag }}
       - name: build-and-push-docker-image
         uses: docker/build-push-action@v3
         with:
