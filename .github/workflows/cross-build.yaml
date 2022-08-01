@@ -34,6 +34,13 @@ jobs:
           git add .
           git commit -m "update version"
           git push
+      - name: export commit hash
+        run: |
+          hash=`git rev-parse HEAD`
+          echo "::set-output name=hash::${hash}"
+        id: latest_commit
+    outputs:
+      hash: ${{ steps.latest_commit.outputs.hash }}
   tagging:
     runs-on: ubuntu-latest
     needs: version-up
@@ -41,7 +48,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
         with:
-          ref: "main"
+          ref: ${{ needs.version-up.outputs.hash }}
       - name: create tag and push tag
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.0
@@ -52,12 +59,14 @@ jobs:
       changelog: ${{ steps.tag_version.outputs.changelog }}
   cross-build:
     runs-on: ubuntu-latest
-    needs: tagging
+    needs:
+      - version-up
+      - tagging
     steps:
       - name: checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ needs.tagging.outputs.tag }}
+          ref: ${{ needs.version-up.outputs.hash }}
       - name: cross build
         uses: crazy-max/ghaction-xgo@v2
         with:
@@ -91,12 +100,14 @@ jobs:
           path: build/*.zip
   build-on-mac:
     runs-on: macos-latest
-    needs: tagging
+    needs:
+      - version-up
+      - tagging
     steps:
       - name: checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ needs.tagging.outputs.tag }}
+          ref: ${{ needs.version-up.outputs.hash }}
       - name: setup go
         uses: actions/setup-go@v2
         with:
