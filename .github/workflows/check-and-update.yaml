@@ -207,7 +207,7 @@ jobs:
         with:
           images: ${{ secrets.DOCKER_USERNAME}}/${{ github.repository }}
           tags: |
-            type=semver,pattern={{version}},value=${{ needs.tagging.outputs.tag }}
+            type=semver,pattern={{raw}}
       - name: build-and-push-docker-image
         uses: docker/build-push-action@v3
         with:
