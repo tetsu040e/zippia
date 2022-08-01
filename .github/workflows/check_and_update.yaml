@@ -29,6 +29,18 @@ jobs:
       - name: clean
         run: ./scripts/clean.sh
         if: steps.check.outputs.updated == 'true'
+      - name: create tag dry run
+        id: tag_version_dry
+        uses: mathieudutour/github-tag-action@v6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          dry_run: true
+        if: steps.check.outputs.updated == 'true'
+      - name: version up
+        run: |
+          sed -i -E 's/^var Version = \"(v[0-9]+\.[0-9]+\.[0-9]+)\"/var Version = "${{ steps.tag_version_dry.outputs.new_tag }}"/' main.go
+          grep "^var Version" main.go
+        if: steps.check.outputs.updated == 'true'
       - name: diff
         id: diff
         run: |
