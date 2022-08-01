@@ -176,7 +176,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ secrets.DOCKER_USERNAME}}/${{ github.repository }}
+          images: tetsu040e/zippia
           tags: |
             type=semver,pattern={{raw}}
       - name: build-and-push-docker-image
