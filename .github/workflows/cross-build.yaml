@@ -20,7 +20,7 @@ jobs:
       - name: version up
         run: |
           sed -i -E 's/^var Version = \"(v[0-9]+\.[0-9]+\.[0-9]+)\"/var Version = "${{ steps.tag_version_dry.outputs.new_tag }}"/' main.go
-          sed -i -E 's/^ ENV VERSION (v[0-9]+\.[0-9]+\.[0-9]+)/ENV VERSION ${{ steps.tag_version_dry.outputs.new_tag }}/' Dockerfile
+          sed -i -E 's/^ENV VERSION (v[0-9]+\.[0-9]+\.[0-9]+)/ENV VERSION ${{ steps.tag_version_dry.outputs.new_tag }}/' Dockerfile
           grep "^var Version" main.go
           grep "^ENV VERSION" Dockerfile
       - name: diff
@@ -159,6 +159,7 @@ jobs:
   build-and-push-docker-image:
     runs-on: ubuntu-latest
     needs:
+      - tagging
       - create-releases
     steps:
       - name: checkout
@@ -174,7 +175,9 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: tetsu040e/zippia
+          images: ${{ secrets.DOCKER_USERNAME}}/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ needs.tagging.outputs.tag }}
       - name: build-and-push-docker-image
         uses: docker/build-push-action@v3
         with:
