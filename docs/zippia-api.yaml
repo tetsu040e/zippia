@@ -5,7 +5,7 @@ info:
   license:
     name: "MIT"
     url: "https://github.com/tetsu040e/zippia/blob/main/LICENSE"
-  version: "v0.1.1"
+  version: "v0.3.17"
 paths:
   /:
     get:
