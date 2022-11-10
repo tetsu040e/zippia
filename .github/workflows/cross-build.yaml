@@ -1,75 +1,34 @@
 name: cross-build
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 jobs:
-  version-up:
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v3
-        with:
-          ref: "main"
-      - name: create tag dry run
-        id: tag_version_dry
-        uses: mathieudutour/github-tag-action@v6.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          dry_run: true
-      - name: version up
-        run: |
-          sed -i -E 's/^var Version = \"(v[0-9]+\.[0-9]+\.[0-9]+)\"/var Version = "${{ steps.tag_version_dry.outputs.new_tag }}"/' main.go
-          sed -i -E 's/^ENV VERSION (v[0-9]+\.[0-9]+\.[0-9]+)/ENV VERSION ${{ steps.tag_version_dry.outputs.new_tag }}/' Dockerfile
-          grep "^var Version" main.go
-          grep "^ENV VERSION" Dockerfile
-      - name: diff
-        id: diff
-        run: |
-          git diff --name-only --exit-code
-        continue-on-error: true
-      - name: commit & push
-        run: |
-          git status -sb
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add .
-          git commit -m "update version"
-          git push
-      - name: export commit hash
-        run: |
-          hash=`git rev-parse HEAD`
-          echo "::set-output name=hash::${hash}"
-        id: latest_commit
-    outputs:
-      hash: ${{ steps.latest_commit.outputs.hash }}
   tagging:
     runs-on: ubuntu-latest
-    needs: version-up
     steps:
       - name: checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ needs.version-up.outputs.hash }}
+          fetch-depth: 0
       - name: create tag and push tag
         id: tag_version
-        uses: mathieudutour/github-tag-action@v6.0
+        uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          commit_sha: ${{ needs.version-up.outputs.hash }}
     outputs:
       tag: ${{ steps.tag_version.outputs.new_tag }}
       changelog: ${{ steps.tag_version.outputs.changelog }}
   cross-build:
     runs-on: ubuntu-latest
-    needs:
-      - version-up
-      - tagging
+    needs: tagging
     steps:
       - name: checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ needs.version-up.outputs.hash }}
+          ref: ${{ needs.tagging.outputs.tag }}
+          fetch-depth: 0
+      - name: cat
+        run: |
+          cat var/last-modified.txt
       - name: cross build
         uses: crazy-max/ghaction-xgo@v2
         with:
@@ -103,14 +62,13 @@ jobs:
           path: build/*.zip
   build-on-mac:
     runs-on: macos-latest
-    needs:
-      - version-up
-      - tagging
+    needs: tagging
     steps:
       - name: checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ needs.version-up.outputs.hash }}
+          ref: ${{ needs.tagging.outputs.tag }}
+          fetch-depth: 0
       - name: setup go
         uses: actions/setup-go@v2
         with:
@@ -159,14 +117,13 @@ jobs:
   build-and-push-docker-image:
     runs-on: ubuntu-latest
     needs:
-      - version-up
       - tagging
       - create-releases
     steps:
       - name: checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ needs.version-up.outputs.hash }}
+          ref: ${{ needs.tagging.outputs.tag }}
       - name: log-in-to-docherhub
         uses: docker/login-action@v2
         with:

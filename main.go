@@ -94,7 +94,11 @@ func main() {
 	})
 
 	addr := fmt.Sprintf("%s:%s", *host, *port)
-	log.Println("start the Japanese zip code search API server.\n" + string(banner))
+	log.Println(fmt.Sprintf(`start the Japanese zip code search API server.
+%s
+version %s
+Zip code was last modified on "%s"
+`, string(banner), string(Version), string(lastModified)))
 	log.Printf("http server started on http://%s\n", addr)
 	log.Fatal(http.ListenAndServe(addr, nil))
 }
