@@ -15,7 +15,7 @@ import (
 
 const appName = "zippia"
 
-var Version = "v0.3.140"
+var Version = "v0.3.141"
 
 //go:embed var/last-modified.txt
 var lastModified []byte
