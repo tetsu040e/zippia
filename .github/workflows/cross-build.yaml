@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: create tag and push tag
@@ -22,7 +22,7 @@ jobs:
     needs: tagging
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ needs.tagging.outputs.tag }}
           fetch-depth: 0
@@ -56,7 +56,7 @@ jobs:
             done;
           )
         if: needs.tagging.outputs.tag
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: artifacts-by-cross-build
           path: build/*.zip
@@ -65,7 +65,7 @@ jobs:
     needs: tagging
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ needs.tagging.outputs.tag }}
           fetch-depth: 0
@@ -83,7 +83,7 @@ jobs:
             zip -r zippia-${{ needs.tagging.outputs.tag }}-darwin-amd64.zip zippia
           )
         if: needs.tagging.outputs.tag
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: artifacts-by-mac
           path: build/*.zip
@@ -94,12 +94,12 @@ jobs:
       - cross-build
       - build-on-mac
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: artifacts-by-cross-build
           path: build/
         if: needs.tagging.outputs.tag
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: artifacts-by-mac
           path: build/
@@ -121,7 +121,7 @@ jobs:
       - create-releases
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ needs.tagging.outputs.tag }}
       - name: log-in-to-docherhub
