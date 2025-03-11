@@ -1,6 +1,6 @@
 FROM debian:latest
 
-ENV VERSION v0.3.345
+ENV VERSION v0.3.346
 RUN apt update && apt install -y wget unzip
 RUN wget https://github.com/tetsu040e/zippia/releases/download/${VERSION}/zippia-${VERSION}-linux-amd64.zip
 RUN unzip zippia-${VERSION}-linux-amd64.zip
